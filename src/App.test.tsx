@@ -1,15 +1,24 @@
 import React from 'react';
-import {render, fireEvent, wait, screen} from '@testing-library/react';
+import {render, fireEvent, wait, act, screen} from '@testing-library/react';
 import App from './App';
+import http from './http';
 
-test.only('renders learn react link', async (done) => {
-  render(<App/>);
-  const input = screen.getByLabelText(/Customer Email/i);
-  const errorMsg = screen.getByText(/valid email/i);
+test('Resolves ajax with set state - TRUE', async () => {
+  await act(async () => {
+    jest.spyOn(http, 'get').mockRejectedValue({data: [true]});
+    render(<App/>);
+  });
 
-  fireEvent.change(input, {target: {value: 'woot@home'}});
-  fireEvent.blur(input);
+  const signedIn = screen.getByText(/signed in/i);
+  expect(signedIn.textContent).toContain('true')
+});
 
-  expect(errorMsg).not.toBeVisible()
+test('Resolves ajax with set state - FALSE', async () => {
+  await act(async () => {
+    jest.spyOn(http, 'get').mockRejectedValue({data: [false]});
+    render(<App/>);
+  });
 
+  const signedIn = screen.getByText(/signed in/i);
+  expect(signedIn.textContent).toContain('false')
 });
